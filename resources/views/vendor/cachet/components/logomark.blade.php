@@ -1,9 +1,10 @@
 {{--
-    hrConnectum logomark override (additive layer).
-    Used on small screens in place of cachet::logomark. Same brand wordmark,
-    sized via the caller's classes (e.g. "h-8 w-auto sm:hidden").
+    hrConnectum logomark override (additive layer; replaces cachet::logomark).
+    Shown on small screens. Same brand wordmark and the same single-<img>
+    approach as the logo component, so the caller's height class applies
+    directly and the dark-mode variant swaps via prefers-color-scheme.
 --}}
-<span {{ $attributes }}>
-    <img src="{{ asset('vendor/hrconnectum/hr_logo_black.png') }}" alt="hrConnectum" class="h-full w-auto dark:hidden" />
-    <img src="{{ asset('vendor/hrconnectum/hr_logo_white.png') }}" alt="hrConnectum" class="hidden h-full w-auto dark:block" />
-</span>
+<picture>
+    <source srcset="{{ asset('vendor/hrconnectum/hr_logo_white.png') }}" media="(prefers-color-scheme: dark)" />
+    <img src="{{ asset('vendor/hrconnectum/hr_logo_black.png') }}" alt="hrConnectum" {{ $attributes }} />
+</picture>
