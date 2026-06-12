@@ -20,3 +20,9 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# hrConnectum: regenerated Filament fonts (published via filament:assets)
+/public/fonts/filament
+
+# Playwright MCP scratch output
+/.playwright-mcp
