@@ -82,6 +82,9 @@ PHP 8.4 site, private repo `hrConnectum/status.hrconnectum.com`. Deploy script: 
 Provision a queue worker and the scheduler cron per Cachet docs. `.env` lives on the server (never
 committed).
 
+Full Forge-API provisioning runbook (target server, exact API calls, `.env`, deploy script,
+workers, SSL): [docs/forge-deploy-spec.md](docs/forge-deploy-spec.md).
+
 ---
 
 <p align="center">
