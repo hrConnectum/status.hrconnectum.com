@@ -11,6 +11,7 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,8 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// hrConnectum: health-check the tracked services every minute and update their
+// status page components. See App\Console\Commands\CheckComponents and
+// config/hrconnectum.php. Driven by the server's `schedule:run` cron.
+Schedule::command('status:check')->everyMinute()->withoutOverlapping();

@@ -279,4 +279,10 @@ curl -s https://status.hrconnectum.com/ | grep -oiE '<title>[^<]*</title>|--acce
 - The branding (indigo, logo, footer, favicon) is applied entirely by `BrandingSeeder` in the
   deploy script plus the repo's published views, so a fresh deploy is fully branded with no
   manual dashboard steps.
+- **Monitoring is automatic once the scheduler (step 7) is running.** `status:check` runs every
+  minute via `schedule:run` and flips the `hrConnectum Tool` / `hrConnectum Website` components
+  from real HTTP checks. Override the checked URLs with `HRC_TOOL_URL` / `HRC_WEBSITE_URL` in
+  `.env` if they differ from the defaults. If Cloudflare bot protection blocks the
+  `hrConnectum-StatusBot` user agent on those domains, allowlist it so a block is not read as an
+  outage.
 ```

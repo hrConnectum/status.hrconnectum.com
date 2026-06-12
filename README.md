@@ -16,7 +16,8 @@ touch the **additive layer** so upstream updates stay painless:
 |---|---|---|
 | Env / config | `.env`, `config/cachet.php`, `config/hrconnectum.php` | App name, URL, mail, brand palette |
 | Branding settings | `database/seeders/BrandingSeeder.php` | Writes Cachet settings (theme accent, custom CSS, footer, favicon) |
-| Tracked services | `database/seeders/ComponentsSeeder.php` | Seeds the component groups + components shown on the status page |
+| Tracked services | `config/hrconnectum.php` + `database/seeders/ComponentsSeeder.php` | The list of services, seeded as Cachet components |
+| Monitoring | `App\Console\Commands\CheckComponents` (`status:check`) | Health-checks each service every minute and updates its component |
 | Logo | `resources/views/vendor/cachet/components/logo.blade.php`, `logomark.blade.php` + `public/vendor/hrconnectum/` | Published view override + our own assets |
 
 We **never** edit `vendor/cachethq/core` or core migrations.
@@ -40,9 +41,8 @@ php artisan db:seed --class=ComponentsSeeder --force   # seeds the tracked servi
 php artisan storage:link
 ```
 
-`ComponentsSeeder` is idempotent and status-preserving: re-running it updates the catalogue
-metadata but never resets a component's live status, so it is safe to re-run after editing the
-service list in the seeder.
+`ComponentsSeeder` reads the service list from `config/hrconnectum.php` and is idempotent and
+status-preserving: re-running it updates metadata but never resets a component's live status.
 
 Local URL: `http://status.hrconnectum.test` (Apache vhost at
 `C:/laragon/etc/apache2/sites-enabled/status.hrconnectum.test.conf`, with a PHP-8.4 fcgid wrapper).
@@ -58,6 +58,25 @@ php artisan db:seed --class=BrandingSeeder --force && php artisan optimize:clear
 ```
 
 Exact hrConnectum hex values are injected as custom CSS that overrides Cachet's named theme.
+
+### Monitoring (auto-detect outages)
+
+Cachet itself does not monitor anything. The services in `config/hrconnectum.php` (`components`)
+are health-checked every minute by the `status:check` command (scheduled in `routes/console.php`,
+driven by the server's `schedule:run` cron). Each service's `url` gets one HTTP request: a response
+below 500 keeps it `operational`; a 5xx, timeout, or connection failure flips it to a major outage
+after `monitor.failure_threshold` consecutive misses, and it recovers on the first success.
+
+Only **public URLs** can be auto-checked this way. Internal services (database, queues, third-party
+integrations) are not reachable from this separate app, so manage those with manual incidents, or
+expose a `/health` endpoint in the main app for this page to poll.
+
+```bash
+php artisan status:check            # run a check by hand
+```
+
+Tune via env: `HRC_TOOL_URL`, `HRC_WEBSITE_URL`, `HRC_MONITOR_TIMEOUT`,
+`HRC_MONITOR_FAILURE_THRESHOLD`, `HRC_MONITOR_DOWN_STATUS`.
 
 ### Update workflow
 
