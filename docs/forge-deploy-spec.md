@@ -143,13 +143,20 @@ await forge.forgePost(`/servers/1214005/sites/${siteId}/deployment/deploy`, {});
 // poll: forge.forgeGet(`/servers/1214005/sites/${siteId}`) until deployment_status is null/finished
 ```
 
-### 11. Create the admin user (one-time, post first successful deploy)
+### 11. One-time post-deploy: admin user + component catalogue
+Run after the first successful deploy (these are one-time, not part of the deploy script):
 ```js
+// Admin user. Use a strong password; store it in the team password manager, not here.
 await forge.forgePost(`/servers/1214005/sites/${siteId}/commands`, {
   command: `php8.4 artisan cachet:make:user admin@hrconnectum.com --name "hrConnectum Admin" --password '<STRONG_PASSWORD>' --no-interaction`,
 });
+
+// Seed the tracked services (component groups + components). Idempotent and
+// status-preserving, so it is safe to re-run after editing ComponentsSeeder.
+await forge.forgePost(`/servers/1214005/sites/${siteId}/commands`, {
+  command: `php8.4 artisan db:seed --class=ComponentsSeeder --force`,
+});
 ```
-Use a strong password and store it in the team password manager, not in this file.
 
 ---
 

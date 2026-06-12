@@ -16,6 +16,7 @@ touch the **additive layer** so upstream updates stay painless:
 |---|---|---|
 | Env / config | `.env`, `config/cachet.php`, `config/hrconnectum.php` | App name, URL, mail, brand palette |
 | Branding settings | `database/seeders/BrandingSeeder.php` | Writes Cachet settings (theme accent, custom CSS, footer, favicon) |
+| Tracked services | `database/seeders/ComponentsSeeder.php` | Seeds the component groups + components shown on the status page |
 | Logo | `resources/views/vendor/cachet/components/logo.blade.php`, `logomark.blade.php` + `public/vendor/hrconnectum/` | Published view override + our own assets |
 
 We **never** edit `vendor/cachethq/core` or core migrations.
@@ -34,9 +35,14 @@ cp .env.example .env             # then set DB_* to MySQL: database status_hrcon
 php artisan key:generate
 php artisan migrate
 php artisan cachet:make:user admin@hrconnectum.com --name "hrConnectum Admin" --password "<pw>" --no-interaction
-php artisan db:seed --class=BrandingSeeder --force   # applies hrConnectum branding
+php artisan db:seed --class=BrandingSeeder --force     # applies hrConnectum branding
+php artisan db:seed --class=ComponentsSeeder --force   # seeds the tracked services (run once)
 php artisan storage:link
 ```
+
+`ComponentsSeeder` is idempotent and status-preserving: re-running it updates the catalogue
+metadata but never resets a component's live status, so it is safe to re-run after editing the
+service list in the seeder.
 
 Local URL: `http://status.hrconnectum.test` (Apache vhost at
 `C:/laragon/etc/apache2/sites-enabled/status.hrconnectum.test.conf`, with a PHP-8.4 fcgid wrapper).
