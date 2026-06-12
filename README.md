@@ -78,6 +78,21 @@ php artisan status:check            # run a check by hand
 Tune via env: `HRC_TOOL_URL`, `HRC_WEBSITE_URL`, `HRC_MONITOR_TIMEOUT`,
 `HRC_MONITOR_FAILURE_THRESHOLD`, `HRC_MONITOR_DOWN_STATUS`.
 
+#### Cloudflare bot protection (avoiding false outages)
+
+The checker identifies itself with the user agent `hrConnectum-StatusBot/1.0`. A response under
+HTTP 500 counts as "up", so a plain `403` block is tolerated, but a Cloudflare **challenge** (Bot
+Fight Mode, a managed / JS challenge, or "I'm Under Attack" mode, which answer with `503`) is read
+as a **false outage**. If a service keeps flapping while it is actually fine, allowlist the checker
+in the affected Cloudflare zone (`hrconnectum.com`, etc.):
+
+- **Security → WAF → Custom rules:** add a rule that **Skips** (managed challenge + Super Bot Fight
+  Mode) when `http.user_agent contains "hrConnectum-StatusBot"`, **or**
+- **Security → WAF → Tools → IP Access Rules:** allowlist the status server's IP (`23.88.1.18`).
+
+To change the user agent the checker sends, edit `isReachable()` in
+`app/Console/Commands/CheckComponents.php`.
+
 ### Update workflow
 
 **Shell (this repo) from upstream Cachet** — note upstream's default branch is `3.x`, not `main`:
